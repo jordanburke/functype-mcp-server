@@ -1,19 +1,27 @@
 {
-  "name": "ts-builds-template",
-  "version": "1.0.0",
-  "description": "A basic template for creating a TypeScript Builds and Publishing it to NPM.",
+  "name": "functype-mcp-server",
+  "version": "0.1.0",
+  "description": "MCP server for functype documentation lookup and TypeScript code validation",
   "keywords": [
+    "mcp",
+    "functype",
     "typescript",
-    "template",
-    "tsdown",
-    "npm"
+    "functional-programming",
+    "model-context-protocol",
+    "claude",
+    "ai-assistant",
+    "fastmcp",
+    "type-checking"
   ],
-  "author": "jordan.burke@gmail.com",
+  "author": "Jordan Burke <jordan.burke@gmail.com>",
   "license": "MIT",
-  "homepage": "https://github.com/jordanburke/ts-builds-template",
+  "homepage": "https://github.com/jordanburke/functype-mcp-server#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/jordanburke/ts-builds-template"
+    "url": "git+https://github.com/jordanburke/functype-mcp-server.git"
+  },
+  "bugs": {
+    "url": "https://github.com/jordanburke/functype-mcp-server/issues"
   },
   "scripts": {
     "validate": "ts-builds validate",
@@ -25,14 +33,15 @@
     "test": "ts-builds test",
     "test:watch": "ts-builds test:watch",
     "test:coverage": "ts-builds test:coverage",
-    "build": "ts-builds build",
+    "build": "NODE_ENV=production ts-builds build",
     "dev": "ts-builds dev",
-    "prepublishOnly": "pnpm validate"
+    "prepublishOnly": "pnpm validate",
+    "inspect": "pnpm build && npx @modelcontextprotocol/inspector dist/index.js",
+    "serve": "pnpm build && node dist/index.js",
+    "serve:dev": "tsx watch src/index.ts"
   },
-  "devDependencies": {
-    "@types/node": "^24.10.13",
-    "ts-builds": "^2.4.0",
-    "tsdown": "^0.20.3"
+  "bin": {
+    "functype-mcp-server": "dist/bin.js"
   },
   "type": "module",
   "main": "./dist/index.js",
@@ -46,9 +55,22 @@
     }
   },
   "files": [
-    "lib",
-    "dist"
+    "dist/",
+    "README.md",
+    "LICENSE"
   ],
+  "dependencies": {
+    "fastmcp": "^3.33.0",
+    "functype": "^0.46.2",
+    "typescript": "^5.9.3",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.13",
+    "ts-builds": "^2.4.0",
+    "tsdown": "^0.20.3",
+    "tsx": "^4.21.0"
+  },
   "prettier": "ts-builds/prettier",
   "packageManager": "pnpm@10.30.0+sha512.2b5753de015d480eeb88f5b5b61e0051f05b4301808a82ec8b840c9d2adf7748eb352c83f5c1593ca703ff1017295bc3fdd3119abb9686efc96b9fcb18200937"
 }

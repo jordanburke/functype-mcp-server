@@ -4,93 +4,78 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a TypeScript library template designed to be cloned/forked for creating new npm packages. It uses the `ts-builds` toolchain for standardized build scripts with ESM output.
+MCP (Model Context Protocol) server for the functype TypeScript FP library. Provides documentation lookup and compile-time code validation tools so AI editors can verify functype code before presenting it to users.
 
-**Template Usage**: See STANDARDIZATION_GUIDE.md for applying this pattern to other TypeScript projects.
+**SDK:** FastMCP + Zod
+**Build:** ts-builds + tsdown with `__VERSION__` injection
+**Transport:** stdio (default), httpStream (via `TRANSPORT_TYPE` env var)
 
 ## Development Commands
 
-All commands delegate to `ts-builds` for consistency across projects:
-
 ```bash
-pnpm validate        # Main command: format + lint + test + build (use before commits)
-
-pnpm format          # Format code with Prettier
-pnpm format:check    # Check formatting only
-
-pnpm lint            # Fix ESLint issues
-pnpm lint:check      # Check ESLint issues only
-
-pnpm test            # Run tests once
-pnpm test:watch      # Run tests in watch mode
-pnpm test:coverage   # Run tests with coverage
-
-pnpm build           # Production build (outputs to dist/)
-pnpm dev             # Development build with watch mode
-
-pnpm typecheck       # Check TypeScript types
+pnpm validate          # Main command: format + lint + typecheck + test + build
+pnpm test              # Run tests
+pnpm build             # Production build (NODE_ENV=production)
+pnpm dev               # Development build with watch
+pnpm typecheck         # TypeScript compilation check
+pnpm inspect           # Build + launch MCP Inspector
+pnpm serve:dev         # Dev server with tsx watch
 ```
 
 ### Running a Single Test
 
 ```bash
-pnpm test -- --testNamePattern="pattern"    # Filter by test name
-pnpm test -- test/specific.spec.ts          # Run specific file
+pnpm vitest run test/docs.spec.ts
+pnpm vitest run test/validate.spec.ts
 ```
 
 ## Architecture
 
-### Build System: ts-builds + tsdown
-
-- **ts-builds**: Centralized toolchain package providing all build scripts
-- **tsdown**: Underlying bundler configured via `ts-builds/tsdown`
-- **Configuration**: `tsdown.config.ts` imports default config from ts-builds
-- **TypeScript**: `tsconfig.json` extends `ts-builds/tsconfig`
-- **Prettier**: Uses `ts-builds/prettier` shared config
-
-### Output Format
-
-- **dist/**: Production builds containing:
-  - `index.js` - ES module format
-  - `index.d.ts` - TypeScript declarations
-- **lib/**: Development builds (also published)
-
-### Package Exports
-
-```json
-{
-  "main": "./dist/index.js",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "default": "./dist/index.js"
-    }
-  }
-}
+```
+src/
+  index.ts                      # FastMCP server + 4 tool registrations
+  bin.ts                        # CLI entry point (--version, --help)
+  lib/
+    docs/
+      data.ts                   # Type/interface data (adapted from functype CLI)
+      full-interfaces.ts        # Full TypeScript interface definitions
+      formatters.ts             # Markdown formatters for MCP output
+    validator/
+      compiler-host.ts          # Custom ts.CompilerHost for in-memory type-checking
+      validate.ts               # Core validateCode() function
+      types.ts                  # ValidationResult, ValidationDiagnostic types
+test/
+  docs.spec.ts                  # Documentation formatter tests
+  validate.spec.ts              # TypeScript validator tests
 ```
 
-### Testing: Vitest
+## Tools
 
-- Tests located in `test/*.spec.ts`
-- Uses Vitest with configuration from ts-builds
-- Coverage via v8 provider
+| Tool             | Description                                                   |
+| ---------------- | ------------------------------------------------------------- |
+| `search_docs`    | Search functype docs by keyword; omit query for full overview |
+| `get_type_api`   | Detailed type reference with methods by category              |
+| `get_interfaces` | Interface hierarchy (Functor, Monad, Foldable, etc.)          |
+| `validate_code`  | Type-check functype code snippets via TypeScript Compiler API |
 
-## Key Files
+## Key Design Decisions
 
-- `src/index.ts` - Main library entry point
-- `test/*.spec.ts` - Test files
-- `tsdown.config.ts` - Build config (imports from ts-builds)
-- `tsconfig.json` - TypeScript config (extends ts-builds)
-- `.claude/skills/ts-builds-template/` - Claude Code skill for bootstrapping libraries from this template
+- **Docs data is copied from functype**, not imported — functype doesn't export CLI data publicly
+- **Validator uses TypeScript Compiler API** with a custom CompilerHost that resolves functype `.d.ts` files from node_modules
+- **Auto-import**: `validate_code` automatically prepends functype imports unless the code already contains them
+- **Line number adjustment**: When imports are prepended, line numbers in diagnostics are offset to match the user's original code
+- **No functype runtime dependency in formatters** — formatters are plain TypeScript for portability
 
-## Publishing
+## Updating Docs Data
 
-```bash
-npm version patch|minor|major
-npm publish --access public
-```
+When functype releases new types or methods:
 
-The `prepublishOnly` hook automatically runs `pnpm validate` before publishing.
+1. Update `src/lib/docs/data.ts` — TYPES, INTERFACES, CATEGORIES
+2. Update `src/lib/docs/full-interfaces.ts` — FULL_INTERFACES
+3. Run `pnpm validate`
+
+## Build Configuration
+
+- `tsdown.config.ts` — Custom config (not ts-builds default) for dual entry points and `__VERSION__` injection
+- `tsconfig.json` — Extends `ts-builds/tsconfig`
+- Output: `dist/index.js` (server) + `dist/bin.js` (CLI)
