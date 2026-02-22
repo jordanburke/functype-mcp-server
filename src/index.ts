@@ -1,9 +1,8 @@
 import { FastMCP } from "fastmcp"
 import { z } from "zod"
 
-import { VERSION } from "./lib/docs/data"
+import { FULL_INTERFACES, VERSION } from "./lib/docs/data"
 import { formatInterfaces, formatOverview, formatType, getTypeByName, searchTypes } from "./lib/docs/formatters"
-import { FULL_INTERFACES } from "./lib/docs/full-interfaces"
 import { validateCode } from "./lib/validator/validate"
 
 declare const __VERSION__: string

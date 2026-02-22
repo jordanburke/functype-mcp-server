@@ -4,8 +4,7 @@
  */
 
 import type { InterfaceData, TypeData } from "./data"
-import { CATEGORIES, INTERFACES, TYPES, VERSION } from "./data"
-import { FULL_INTERFACES } from "./full-interfaces"
+import { CATEGORIES, FULL_INTERFACES, INTERFACES, TYPES, VERSION } from "./data"
 
 const METHOD_CATEGORIES = ["create", "transform", "extract", "check", "other"] as const
 
