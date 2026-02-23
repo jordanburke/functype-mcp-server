@@ -21,6 +21,7 @@ export default defineConfig({
   outDir: isProduction ? "dist" : "lib",
   platform: "node",
   treeshake: true,
+  external: [/^functype/],
   define: {
     __VERSION__: JSON.stringify(pkg.version),
   },

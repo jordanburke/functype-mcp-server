@@ -31,6 +31,10 @@ const resolveFunctypeDistDir = (): string => {
 
 const fileCache = new Map<string, string | undefined>()
 
+export const clearFileCache = (): void => {
+  fileCache.clear()
+}
+
 const readFileCached = (path: string): string | undefined => {
   if (fileCache.has(path)) return fileCache.get(path)
   try {

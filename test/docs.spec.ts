@@ -1,7 +1,11 @@
-import { describe, expect, it } from "vitest"
+import { beforeAll, describe, expect, it } from "vitest"
 
 import { formatInterfaces, formatOverview, formatType, getTypeByName, searchTypes } from "../src/lib/docs/formatters"
-import { TYPES } from "../src/lib/docs/data"
+import { TYPES, initDocsData } from "../src/lib/docs/data"
+
+beforeAll(async () => {
+  await initDocsData()
+})
 
 describe("formatOverview", () => {
   it("returns overview with all categories", () => {
