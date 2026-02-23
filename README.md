@@ -8,6 +8,7 @@ MCP server for [functype](https://github.com/jordanburke/functype) — documenta
 - **`get_type_api`** — Detailed API reference for any type (Option, Either, List, IO, etc.)
 - **`get_interfaces`** — Interface hierarchy (Functor, Monad, Foldable, Extractable, etc.)
 - **`validate_code`** — Type-check functype code snippets using the TypeScript Compiler API
+- **`set_functype_version`** — Switch functype version at runtime (installs + reloads docs and types)
 
 The `validate_code` tool is the killer feature: an LLM writes functype code, calls the tool, gets back type errors, and fixes them before showing the user.
 
@@ -89,6 +90,16 @@ auto_import?: bool    — Auto-import functype types if no import present (defau
 ```
 
 Returns `Validation PASSED` or a list of errors with line, column, message, and TS error code.
+
+### `set_functype_version`
+
+Switch the functype version at runtime. Installs the specified version and reloads all documentation and type definitions.
+
+```
+version: string  — Version to install (e.g., "0.47.0", "latest", ...)
+```
+
+Requires functype >= 0.47.0 for full documentation support. Older versions will still work for type-checking via `validate_code`.
 
 ## Environment Variables
 
